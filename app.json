@@ -1,0 +1,27 @@
+{
+  "name": "Document To Video",
+  "description": "A simple Telegram bot to convert documents to video",
+  "repository": "https://github.com/bakamono12/GhostForwarder",
+  "logo": "https://avatars1.githubusercontent.com/u/34474300?s=280&v=4",
+  "keywords": [
+    "python",
+    "pyrogram",
+    "telegram",
+    "bot",
+    "userbot",
+    "Forwarder"
+  ],
+  "image": "heroku/python",
+  "formation": {
+    "worker": {
+      "quantity": 1,
+      "size": "eco"
+    }
+  },
+  "env": {
+    "SESSION_STRING": {
+      "description": "Session string from auth.py file or use the Replit link button in README.md",
+      "required": true
+    }
+  }
+}
