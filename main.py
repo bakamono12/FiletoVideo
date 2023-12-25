@@ -42,7 +42,7 @@ async def update_my_progress(current, total, message=None, download_message=None
         else f"Uploading... {percent:.2f}%"
     await video_bot.edit_message_text(chat_id=message.chat.id, message_id=download_message.id,
                                       text=new_message)
-    await asyncio.sleep(3)
+    await asyncio.sleep(4)
 
 
 @video_bot.on_message(filters.document & custom_filter)
