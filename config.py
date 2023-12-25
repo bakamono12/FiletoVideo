@@ -6,6 +6,5 @@ import os
 
 
 session_string = os.environ.get("SESSION_STRING", None)
-allowed_users = os.environ.get("ALLOWED_USERS", None)
 allowed_group = os.environ.get("ALLOWED_GROUP", None)
 owner = os.environ.get("OWNER", None)
