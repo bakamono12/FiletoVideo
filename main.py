@@ -4,7 +4,7 @@ import time
 from pyrogram import Client, filters, enums
 import logging
 from pyrogram.errors import FloodWait
-from config import session_string
+from config import session_string, allowed_users, allowed_group, owner
 
 # logger
 logging.basicConfig(level=logging.INFO)
@@ -13,8 +13,15 @@ logger = logging.getLogger(__name__)
 # bot
 video_bot = Client("File-To-Video", session_string=session_string, workers=15)
 
+# allowed users and groups
+allowed_users = [int(user) for user in allowed_users.split(",")]
+allowed_group = [int(group) for group in allowed_group.split(",")]
 
-@video_bot.on_message(filters.command("start"))
+# custom filter
+custom_filter = filters.chat(allowed_group) | filters.user(owner) | filters.private
+
+
+@video_bot.on_message(filters.command("start") & custom_filter)
 async def start(client, message):
     await message.reply_text(
         "Hi, I'm a bot that can convert video documents into streamable format. "
@@ -22,7 +29,7 @@ async def start(client, message):
         quote=True)
 
 
-@video_bot.on_message(filters.command("help"))
+@video_bot.on_message(filters.command("help") & custom_filter)
 async def helps(client, message):
     await message.reply_text(
         "Just forward the video document in the group or chat, and I will provide the streamable file.\n"
@@ -39,28 +46,33 @@ async def update_my_progress(current, total, message=None, download_message=None
     await asyncio.sleep(3)
 
 
-@video_bot.on_message(filters.video | filters.document)
+@video_bot.on_message(filters.document & custom_filter)
 async def convert_to_streamable(client, message):
     try:
         reply_one = await message.reply_text("Converting the file", quote=True)
         # check if the file is already converted
         s = time.time()
-        download_file = await message.download(block=True, progress=update_my_progress,
-                                               progress_args=(message, reply_one, False))
-        e = time.time()
-        logger.info(f"Downloaded the file in {e - s} seconds. ")
-        # send the action stating the video upload
-        s = time.time()
-        await video_bot.send_chat_action(message.chat.id, action=enums.ChatAction.UPLOAD_VIDEO)
-        await video_bot.send_video(message.chat.id, video=download_file,
-                                   reply_to_message_id=message.id,
-                                   progress=update_my_progress,
-                                   progress_args=(message, reply_one, True))
-        e = time.time()
-        logger.info(f"Uploaded the file in {e - s} seconds")
-        # delete the video file
-        os.remove(download_file)
-        await reply_one.delete()
+        if message.document.mime_type == "video/mp4":
+            download_file = await message.download(block=True, progress=update_my_progress,
+                                                   progress_args=(message, reply_one, False))
+            e = time.time()
+            logger.info(f"Downloaded the file in {e - s} seconds. ")
+            # send the action stating the video upload
+            s = time.time()
+            await video_bot.send_chat_action(message.chat.id, action=enums.ChatAction.UPLOAD_VIDEO)
+            await video_bot.send_video(message.chat.id, video=download_file,
+                                       reply_to_message_id=message.id,
+                                       progress=update_my_progress,
+                                       progress_args=(message, reply_one, True))
+            e = time.time()
+            logger.info(f"Uploaded the file in {e - s} seconds")
+            # delete the video file
+            os.remove(download_file)
+            await reply_one.delete()
+        else:
+            await reply_one.edit_text("The file is not streamable format.")
+            await asyncio.sleep(3)
+            await reply_one.delete()
     except FloodWait as e:
         await asyncio.sleep(e.x)
     except Exception as e:
