@@ -4,7 +4,7 @@ import time
 from pyrogram import Client, filters, enums
 import logging
 from pyrogram.errors import FloodWait
-from config import session_string, allowed_users, allowed_group, owner
+from config import session_string, allowed_group, owner
 
 # logger
 logging.basicConfig(level=logging.INFO)
@@ -14,7 +14,6 @@ logger = logging.getLogger(__name__)
 video_bot = Client("File-To-Video", session_string=session_string, workers=15)
 
 # allowed users and groups
-allowed_users = [int(user) for user in allowed_users.split(",")]
 allowed_group = [int(group) for group in allowed_group.split(",")]
 
 # custom filter
